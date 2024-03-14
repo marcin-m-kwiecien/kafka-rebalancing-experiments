@@ -8,7 +8,7 @@ POST http://localhost:8080/kafka/producer/stop
 POST http://localhost:8080/kafka/consumer/add
 Content-Type: application/x-www-form-urlencoded
 
-groupId=some-consumer-group
+groupId=latency-test-consumer-group
 
 ###
 POST http://localhost:8080/kafka/consumer/remove

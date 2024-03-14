@@ -81,8 +81,10 @@
         },
         "yAxis": {
           "axisPlacement": "left",
+          "max": "1000000000",
+          "min": 100000,
           "reverse": false,
-          "unit": "ms"
+          "unit": "ns"
         }
       },
       "pluginVersion": "10.4.0",
@@ -95,10 +97,10 @@
             "uid": "bdfnys7w4av40e"
           },
           "editorMode": "code",
-          "expr": "sum(increase(consumer_latency_bucket{partition_id=\"$partition\"}[30s])) by (le)",
+          "expr": "sum(increase(consumer_latency_ns_bucket{partition_id=\"$partition\"}[30s])) by (le)",
           "format": "heatmap",
           "instant": false,
-          "legendFormat": "{{le}}",
+          "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
@@ -114,7 +116,7 @@
     "list": [
       {
         "current": {
-          "selected": true,
+          "selected": false,
           "text": [
             "All"
           ],
@@ -122,7 +124,11 @@
             "$__all"
           ]
         },
-        "definition": "label_values(consumer_latency_bucket{group_id=\"some-consumer-group\"},partition_id)",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "bdfnys7w4av40e"
+        },
+        "definition": "label_values(consumer_latency_ns_bucket,partition_id)",
         "hide": 0,
         "includeAll": true,
         "multi": true,
@@ -130,13 +136,13 @@
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(consumer_latency_bucket{group_id=\"some-consumer-group\"},partition_id)",
+          "query": "label_values(consumer_latency_ns_bucket,partition_id)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 0,
+        "sort": 3,
         "type": "query"
       }
     ]
@@ -149,6 +155,6 @@
   "timezone": "browser",
   "title": "Record latency",
   "uid": "ddfnzrgbz3caod",
-  "version": 7,
+  "version": 10,
   "weekStart": ""
 }

@@ -3,6 +3,7 @@ package pl.boono.kafkarebalancing;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.time.Duration;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 class Consumer {
-    private final KafkaConsumer<String, String> consumer;
+    private final KafkaConsumer<String, Long> consumer;
     private final String topic;
     private final MessageConsumer messageConsumer;
 
@@ -21,7 +22,7 @@ class Consumer {
                 ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer,
                 ConsumerConfig.GROUP_ID_CONFIG, groupId,
                 ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest"
-        ), new StringDeserializer(), new StringDeserializer());
+        ), new StringDeserializer(), new LongDeserializer());
         this.topic = topic;
         this.messageConsumer = messageConsumer;
     }
@@ -46,6 +47,6 @@ class Consumer {
     }
 
     @FunctionalInterface
-    public interface MessageConsumer extends java.util.function.Consumer<ConsumerRecord<String, String>> {
+    public interface MessageConsumer extends java.util.function.Consumer<ConsumerRecord<String, Long>> {
     }
 }

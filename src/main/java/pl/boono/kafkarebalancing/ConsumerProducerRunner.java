@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Queue;
@@ -18,8 +17,9 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class ConsumerProducerRunner {
     public static final Meter.MeterProvider<DistributionSummary> consumerLatencySummaryBuilder = DistributionSummary
-            .builder("consumer_latency")
-            .maximumExpectedValue((double) TimeUnit.SECONDS.toMillis(5))
+            .builder("consumer_latency_ns")
+            .minimumExpectedValue((double) TimeUnit.MICROSECONDS.toNanos(100))
+            .maximumExpectedValue((double) TimeUnit.SECONDS.toNanos(1))
             .publishPercentileHistogram()
             .withRegistry(Metrics.globalRegistry);
     private final KafkaConfig kafkaConfig;
@@ -71,12 +71,12 @@ public class ConsumerProducerRunner {
         consumerToStop.stop();
     }
 
-    private void logLatency(ConsumerRecord<String, String> record, int consumerId, String groupId) {
-        var latencyMs = Instant.now().toEpochMilli() - record.timestamp();
+    private void logLatency(ConsumerRecord<String, Long> record, int consumerId, String groupId) {
+        var latencyNs = System.nanoTime() - record.value();
         consumerLatencySummaryBuilder.withTags(List.of(
                 Tag.of("consumer_id", String.valueOf(consumerId)),
                 Tag.of("group_id", groupId),
                 Tag.of("partition_id", String.valueOf(record.partition()))
-        )).record(latencyMs);
+        )).record(latencyNs);
     }
 }

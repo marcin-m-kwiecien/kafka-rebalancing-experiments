@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.time.Duration;
@@ -12,7 +13,7 @@ import java.util.Map;
 import java.util.UUID;
 
 class Producer {
-    private final KafkaProducer<String, String> producer;
+    private final KafkaProducer<String, Long> producer;
     private final String topic;
     private final int batchSize;
 
@@ -23,7 +24,7 @@ class Producer {
         this.producer = new KafkaProducer<>(
                 Map.of(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers),
                 new StringSerializer(),
-                new StringSerializer());
+                new LongSerializer());
         this.topic = topic;
         this.batchSize = batchSize;
     }
@@ -40,8 +41,9 @@ class Producer {
     private void doRun() {
         var sentWithoutFlush = 0;
         while (this.running) {
+            var nanos = System.nanoTime();
             var record = new ProducerRecord<>(this.topic, null,
-                    Instant.now().toEpochMilli(), UUID.randomUUID().toString(), "string");
+                    Instant.now().toEpochMilli(), UUID.randomUUID().toString(), nanos);
             producer.send(record);
             sentWithoutFlush++;
             if (sentWithoutFlush >= this.batchSize) {

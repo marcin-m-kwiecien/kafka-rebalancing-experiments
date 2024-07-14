@@ -1,5 +1,6 @@
 package pl.boono.kafkarebalancing;
 
+import io.micrometer.core.instrument.Metrics;
 import lombok.Getter;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -22,7 +23,11 @@ class Producer {
 
     Producer(String bootstrapServers, String topic, int batchSize) {
         this.producer = new KafkaProducer<>(
-                Map.of(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers),
+                Map.of(
+                        ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers,
+                        ProducerConfig.COMPRESSION_TYPE_CONFIG, "gzip",
+                        ProducerConfig.LINGER_MS_CONFIG, "100"
+                ),
                 new StringSerializer(),
                 new LongSerializer());
         this.topic = topic;
@@ -47,6 +52,7 @@ class Producer {
             producer.send(record);
             sentWithoutFlush++;
             if (sentWithoutFlush >= this.batchSize) {
+                Metrics.counter("sent_in_batch").increment(sentWithoutFlush);
                 producer.flush();
                 sentWithoutFlush = 0;
             }

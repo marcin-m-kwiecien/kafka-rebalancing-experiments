@@ -17,9 +17,9 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class ConsumerProducerRunner {
     public static final Meter.MeterProvider<DistributionSummary> consumerLatencySummaryBuilder = DistributionSummary
-            .builder("consumer_latency_ns")
+            .builder("consumer_latency_ns_v2")
             .minimumExpectedValue((double) TimeUnit.MICROSECONDS.toNanos(100))
-            .maximumExpectedValue((double) TimeUnit.SECONDS.toNanos(1))
+            .maximumExpectedValue((double) TimeUnit.SECONDS.toNanos(10))
             .publishPercentileHistogram()
             .withRegistry(Metrics.globalRegistry);
     private final KafkaConfig kafkaConfig;

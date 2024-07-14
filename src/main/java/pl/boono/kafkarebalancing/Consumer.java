@@ -21,7 +21,8 @@ class Consumer {
         this.consumer = new KafkaConsumer<>(Map.of(
                 ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer,
                 ConsumerConfig.GROUP_ID_CONFIG, groupId,
-                ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest"
+                ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest",
+                ConsumerConfig.FETCH_MIN_BYTES_CONFIG, 1000000
         ), new StringDeserializer(), new LongDeserializer());
         this.topic = topic;
         this.messageConsumer = messageConsumer;

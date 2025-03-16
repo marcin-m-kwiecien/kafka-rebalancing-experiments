@@ -1,5 +1,7 @@
 package pl.boono.kafkarebalancing;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.Metrics;
 import lombok.Getter;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -14,14 +16,17 @@ import java.util.Map;
 import java.util.UUID;
 
 class Producer {
-    private final KafkaProducer<String, Long> producer;
+    private final KafkaProducer<String, Measurement> producer;
     private final String topic;
     private final int batchSize;
 
     @Getter
     private volatile boolean running;
 
-    Producer(String bootstrapServers, String topic, int batchSize) {
+    Producer(String bootstrapServers,
+             String topic,
+             int batchSize,
+             ObjectMapper objectMapper) {
         this.producer = new KafkaProducer<>(
                 Map.of(
                         ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers,
@@ -29,7 +34,13 @@ class Producer {
                         ProducerConfig.LINGER_MS_CONFIG, "100"
                 ),
                 new StringSerializer(),
-                new LongSerializer());
+                (ignoredTopic, data) -> {
+                    try {
+                        return objectMapper.writeValueAsBytes(data);
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
         this.topic = topic;
         this.batchSize = batchSize;
     }
@@ -46,9 +57,12 @@ class Producer {
     private void doRun() {
         var sentWithoutFlush = 0;
         while (this.running) {
-            var nanos = System.nanoTime();
-            var record = new ProducerRecord<>(this.topic, null,
-                    Instant.now().toEpochMilli(), UUID.randomUUID().toString(), nanos);
+            var record = new ProducerRecord<>(
+                    this.topic,
+                    null,
+                    Instant.now().toEpochMilli(),
+                    UUID.randomUUID().toString(),
+                    new Measurement(Instant.now()));
             producer.send(record);
             sentWithoutFlush++;
             if (sentWithoutFlush >= this.batchSize) {

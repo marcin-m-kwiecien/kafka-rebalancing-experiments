@@ -1,14 +1,14 @@
 ###
 POST http://localhost:8080/kafka/producer/start
-
-###
+#
+####
 POST http://localhost:8080/kafka/producer/stop
 
 ###
-POST http://localhost:8080/kafka/consumer/add
+POST http://localhost:8080/kafka/consumer/add?consumerType=Kafka
 Content-Type: application/x-www-form-urlencoded
 
-groupId=latency-test-consumer-group
+groupId=latency-test-consumer-group-6676&instanceId=i4
 
 ###
 POST http://localhost:8080/kafka/consumer/remove
